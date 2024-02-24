@@ -1,0 +1,31 @@
+version: '3.9' # docker-compose.ymlファイルの構文バージョン
+services:
+  # DB用コンテナ作成
+  db:
+    container_name: sample-db
+    # イメージの指定(docker-hubから直接流用)
+    image: 'mysql:8.2.0'
+    # DBデータ保持用のボリュームをバインド
+    volumes:
+      - sample_db_data:/var/lib/mysql
+    env_file:
+      - ./env/db.env # 環境変数ファイルへのパス
+  # API用コンテナ作成
+  api:
+    container_name: sample-api
+    build: . # イメージのビルドに使用するDockerfileへの相対パス
+    volumes:
+    # バインドマウント
+      - type: bind
+        source: ./app
+        target: /app
+    ports:
+      - 8989:8989
+    env_file:
+      - ./env/api.env
+    # 依存するサービス名(先に起動させたいサービス)
+    depends_on:
+      - db
+# DBデータ保持用のボリューム
+volumes:
+  sample_db_data:
